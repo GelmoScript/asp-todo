@@ -3,28 +3,26 @@ using System.Collections.Generic;
 using TodoItemApi.Models;
 using System.Linq;
 
-namespace TodoItemApi
+namespace TodoItemApi.Services
 {
     public class ListDataSource : IDataSource 
     {
         public List<CityDto> Cities { get; set; }
         public List<PointOfInterestDto> PointOfInterests { get; set; }
 
-        public static ListDataSource Instance { get; } = new ListDataSource();
-
-        private ListDataSource()
+        public ListDataSource()
         {
             InitializeData();
         }
 
         public CityDto GetCityById(int id)
-            => Instance.Cities.FirstOrDefault(city => city.Id == id);
+            => Cities.FirstOrDefault(city => city.Id == id);
 
         public PointOfInterestDto GetPointOfInterestById(int id)
-            => Instance.PointOfInterests.FirstOrDefault(interest => interest.Id == id);
+            => PointOfInterests.FirstOrDefault(interest => interest.Id == id);
 
         public ICollection<PointOfInterestDto> GetPointOfInterestByCityId(int idCity)
-            => Instance.PointOfInterests.FindAll(pointOfInterests => idCity == pointOfInterests.IdCity);
+            => PointOfInterests.FindAll(pointOfInterests => idCity == pointOfInterests.IdCity);
 
         private void InitializeData()
         {

@@ -9,7 +9,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using TodoItemApi.Services;
 using Microsoft.Extensions.Logging;
+using TodoItemApi.Contexts;
+using Microsoft.EntityFrameworkCore;
 
 namespace TodoItemApi
 {
@@ -25,6 +28,13 @@ namespace TodoItemApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSingleton<IDataSource, ListDataSource>();
+
+           
+            services.AddDbContext<CityInfoContext>(options =>
+            {
+                options.UseSqlServer(Configuration.GetConnectionString("CityDb"));
+            });
             services.AddControllers();
         }
 

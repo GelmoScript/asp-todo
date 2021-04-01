@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using TodoItemApi.Models;
+using TodoItemApi.Services;
 
 namespace TodoItemApi.Controllers
 {
@@ -11,16 +12,24 @@ namespace TodoItemApi.Controllers
     [Route("api/interests")]
     public class PointsOfInterestController : ControllerBase
     {
+
+        private readonly IDataSource _source;
+
+        public PointsOfInterestController(IDataSource source)
+        {
+            _source = source ?? throw new ArgumentNullException(nameof(source));
+        }
+
         [HttpGet]
         public IActionResult GetPointOfInterests()
         {
-            return new JsonResult(ListDataSource.Instance.PointOfInterests);
+            return new JsonResult(_source.PointOfInterests);
         }
 
         [HttpGet("{id}")]
         public IActionResult GetPointOfInterestById(int id)
         {
-            PointOfInterestDto interest = ListDataSource.Instance.GetPointOfInterestById(id);
+            PointOfInterestDto interest = _source.GetPointOfInterestById(id);
 
             if (interest == null) return NotFound("Not Point of interest with the given id, try another.");
 
@@ -30,7 +39,7 @@ namespace TodoItemApi.Controllers
         [HttpPost]
         public IActionResult PostPointOfInterest([FromBody] PointOfInterestDto interestDto)
         {
-            var listOfInterests = ListDataSource.Instance.PointOfInterests;
+            var listOfInterests = _source.PointOfInterests;
             int newInterestId = GeneratePointOfInterestId();
             interestDto.Id = newInterestId;
             listOfInterests.Add(interestDto);
@@ -40,7 +49,7 @@ namespace TodoItemApi.Controllers
         [HttpPut("{id}")]
         public IActionResult UpdatePointOfInterest(int id, [FromBody] PointOfInterestDto interestDto)
         {
-            var interestToUpdate = ListDataSource.Instance.GetPointOfInterestById(id);
+            var interestToUpdate = _source.GetPointOfInterestById(id);
             if (interestToUpdate == null) return NotFound();
 
             if (interestDto.Name != null)
@@ -55,16 +64,16 @@ namespace TodoItemApi.Controllers
         [HttpDelete("{id}")]
         public IActionResult DeletePointOfInterest(int id)
         {
-            var interestToDelete = ListDataSource.Instance.GetPointOfInterestById(id);
+            var interestToDelete = _source.GetPointOfInterestById(id);
             if (interestToDelete == null) return NotFound("Not Point of interest with the biven id");
-            var listOfInterests = ListDataSource.Instance.PointOfInterests;
+            var listOfInterests = _source.PointOfInterests;
             listOfInterests.Remove(interestToDelete);
             return Ok(listOfInterests);
         }
 
         private int GeneratePointOfInterestId()
         {
-            var listOfInterests = ListDataSource.Instance.PointOfInterests;
+            var listOfInterests = _source.PointOfInterests;
             var lastInterest = listOfInterests.Last();
             return lastInterest.Id + 1;
         }

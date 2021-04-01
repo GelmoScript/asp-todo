@@ -11,11 +11,11 @@ namespace TodoItemApi.Models
 
         [JsonIgnore]
         public int IdCity { get; set; }
-        public CityDto City {
-            get
-            {
-                return ListDataSource.Instance.GetCityById(IdCity);
-            }
-        }
+        //public CityDto City {
+        //    get
+        //    {
+        //        return ListDataSource.Instance.GetCityById(IdCity);
+        //    }
+        //}
     }
 }

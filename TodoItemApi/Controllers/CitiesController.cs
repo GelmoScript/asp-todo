@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using TodoItemApi.Models;
+using TodoItemApi.Services;
 
 
 namespace TodoItemApi.Controllers
@@ -12,31 +13,38 @@ namespace TodoItemApi.Controllers
     [Route("api/cities")]
     public class CitiesController : ControllerBase
     {
+        private IDataSource _source;
+
+        public CitiesController(IDataSource source)
+        {
+            _source = source ?? throw new ArgumentNullException(nameof(source));
+        }
+
         [HttpGet]
         public IActionResult GetCities()
         {
-            var cities = ListDataSource.Instance.Cities;
+            var cities = _source.Cities;
             return new JsonResult(cities);
         }
 
         [HttpGet("{cityId}")]
         public IActionResult GetCityById(int cityId)
         {
-            var city = ListDataSource.Instance.GetCityById(cityId);
+            var city = _source.GetCityById(cityId);
             return new JsonResult(city);
         }
 
         [HttpGet("{cityId}/interests")]
         public IActionResult GetCityPointsOfInterest(int cityId)
         {
-            var pointOfInterest = ListDataSource.Instance.GetPointOfInterestByCityId(cityId);
+            var pointOfInterest = _source.GetPointOfInterestByCityId(cityId);
             return new JsonResult(pointOfInterest);
         }
 
         [HttpPost]
         public IActionResult PostCity(CityDto city)
         {
-            var listOfCities = ListDataSource.Instance.Cities;
+            var listOfCities = _source.Cities;
             int newCityId = GenerateCityId();
             city.Id = newCityId;
             listOfCities.Add(city);
@@ -47,8 +55,8 @@ namespace TodoItemApi.Controllers
         [HttpDelete("{cityId}")]
         public IActionResult DeleteCity(int cityId)
         {
-            var cityToDelete = ListDataSource.Instance.GetCityById(cityId);
-            var listOfCities = ListDataSource.Instance.Cities;
+            var cityToDelete = _source.GetCityById(cityId);
+            var listOfCities = _source.Cities;
             listOfCities.Remove(cityToDelete);
             return new JsonResult(listOfCities);
 
@@ -57,7 +65,7 @@ namespace TodoItemApi.Controllers
         [HttpPut("{cityId}")]
         public IActionResult UpdateCity(int cityId, [FromBody] CityForUpdateDto cityToUpdate )
         {
-            var cityUpdated = ListDataSource.Instance.GetCityById(cityId);
+            var cityUpdated = _source.GetCityById(cityId);
             if (cityUpdated == null) return NotFound();
             cityUpdated.Name = cityToUpdate.Name;
             cityUpdated.Description = cityToUpdate.Description;
@@ -66,7 +74,7 @@ namespace TodoItemApi.Controllers
 
         private int GenerateCityId()
         {
-            var listOfCities = ListDataSource.Instance.Cities;
+            var listOfCities = _source.Cities;
             var lastCity = listOfCities.Last();
             return lastCity.Id + 1;
         }
