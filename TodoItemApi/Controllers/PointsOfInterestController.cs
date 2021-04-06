@@ -2,9 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
-using TodoItemApi.Models;
+using TodoItemApi.Contexts;
+using TodoItemApi.Dtos;
+using TodoItemApi.Entities;
 using TodoItemApi.Services;
+using TodoItemApi.Services.Repositories;
 
 namespace TodoItemApi.Controllers
 {
@@ -13,69 +18,68 @@ namespace TodoItemApi.Controllers
     public class PointsOfInterestController : ControllerBase
     {
 
-        private readonly IDataSource _source;
+        private readonly IPointsOfInterestRepository _interestsRepository;
+        private readonly IMapper _mapper;
+        private readonly IValidator<PointOfInterestDto> _validator;
 
-        public PointsOfInterestController(IDataSource source)
+        public PointsOfInterestController(IPointsOfInterestRepository interestsRepository, IMapper mapper, IValidator<PointOfInterestDto> validator)
         {
-            _source = source ?? throw new ArgumentNullException(nameof(source));
+            _interestsRepository = interestsRepository;
+            _mapper = mapper;
+            _validator = validator;
         }
 
         [HttpGet]
         public IActionResult GetPointOfInterests()
         {
-            return new JsonResult(_source.PointOfInterests);
+            var interests = _interestsRepository.GetPointsOfInterest();
+            var interestDto = _mapper.Map<IEnumerable<PointOfInterest>>(interests);
+            return Ok(interestDto);
         }
 
         [HttpGet("{id}")]
         public IActionResult GetPointOfInterestById(int id)
         {
-            PointOfInterestDto interest = _source.GetPointOfInterestById(id);
-
-            if (interest == null) return NotFound("Not Point of interest with the given id, try another.");
-
-            return Ok(interest);
+            var interest = _interestsRepository.GetPointOfInterestById(id);
+            if (interest is null)
+                return NotFound();
+            var interestDto = _mapper.Map<PointOfInterestDto>(interest);
+            return Ok(interestDto);
         }
 
         [HttpPost]
         public IActionResult PostPointOfInterest([FromBody] PointOfInterestDto interestDto)
         {
-            var listOfInterests = _source.PointOfInterests;
-            int newInterestId = GeneratePointOfInterestId();
-            interestDto.Id = newInterestId;
-            listOfInterests.Add(interestDto);
-            return new JsonResult(listOfInterests);
+            var validationResult = _validator.Validate(interestDto);
+            if (!validationResult.IsValid)
+                return BadRequest(validationResult.Errors);
+
+            var interest = _mapper.Map<PointOfInterest>(interestDto);
+            var interestCreated = _interestsRepository.Create(interest);
+            return Created("", interestCreated);
         }
 
         [HttpPut("{id}")]
         public IActionResult UpdatePointOfInterest(int id, [FromBody] PointOfInterestDto interestDto)
         {
-            var interestToUpdate = _source.GetPointOfInterestById(id);
-            if (interestToUpdate == null) return NotFound();
-
-            if (interestDto.Name != null)
-                interestToUpdate.Name = interestDto.Name;
-
-            if (interestDto.Description != null)
-                interestToUpdate.Description = interestDto.Description;
-
-            return NoContent();
+            var interest = _interestsRepository.GetPointOfInterestById(id);
+            if (interest is null)
+                return NotFound();
+            _mapper.Map(interestDto, interest);
+            var interestUpdated = _interestsRepository.Update(interest);
+            return Ok(interestUpdated);
         }
 
         [HttpDelete("{id}")]
         public IActionResult DeletePointOfInterest(int id)
         {
-            var interestToDelete = _source.GetPointOfInterestById(id);
-            if (interestToDelete == null) return NotFound("Not Point of interest with the biven id");
-            var listOfInterests = _source.PointOfInterests;
-            listOfInterests.Remove(interestToDelete);
-            return Ok(listOfInterests);
+            var interest = _interestsRepository.GetPointOfInterestById(id);
+            if (interest is null)
+                return NotFound();
+            var interestDeleted = _interestsRepository.Delete(id);
+            var cityDto = _mapper.Map<PointOfInterest>(interestDeleted);
+            return Ok(cityDto);
         }
 
-        private int GeneratePointOfInterestId()
-        {
-            var listOfInterests = _source.PointOfInterests;
-            var lastInterest = listOfInterests.Last();
-            return lastInterest.Id + 1;
-        }
     }
 }

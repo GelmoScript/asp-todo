@@ -1,5 +1,5 @@
 ﻿using System;
-namespace TodoItemApi.Models
+namespace TodoItemApi.Dtos
 {
     public class PointOfInterestForUpdateDto
     {

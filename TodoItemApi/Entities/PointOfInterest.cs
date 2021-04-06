@@ -16,10 +16,19 @@ namespace TodoItemApi.Entities
         [MaxLength(50)]
         public string Name { get; set; }
 
+        [MaxLength(200)]
+        public string Description { get; set; }
+
         [ForeignKey("CityId")]
         public City City { get; set; }
         public int CityId { get; set; }
 
-        
+        [Column("Deleted")]
+        public bool IsDeleted { get; set; }
+        public DateTime? DeleteDate { get; set; }
+        public DateTime? LastUpdateDate { get; set; }
+
+
+
     }
 }

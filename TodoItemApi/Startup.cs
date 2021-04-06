@@ -13,6 +13,11 @@ using TodoItemApi.Services;
 using Microsoft.Extensions.Logging;
 using TodoItemApi.Contexts;
 using Microsoft.EntityFrameworkCore;
+using TodoItemApi.Services.Repositories;
+using FluentValidation.AspNetCore;
+using TodoItemApi.Vacunations;
+using FluentValidation;
+using TodoItemApi.Dtos;
 
 namespace TodoItemApi
 {
@@ -27,14 +32,20 @@ namespace TodoItemApi
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
+            
         {
             services.AddSingleton<IDataSource, ListDataSource>();
-
            
             services.AddDbContext<CityInfoContext>(options =>
             {
                 options.UseSqlServer(Configuration.GetConnectionString("CityDb"));
             });
+            services.AddScoped<ICityRepository, CityRepository>();
+            services.AddScoped<IPointsOfInterestRepository, PointOfInterestRepository>();
+            services.AddAutoMapper(typeof(Startup));
+            services.AddMvc().AddFluentValidation();
+            services.AddTransient<IValidator<CityDto>, CityValidation>();
+            services.AddTransient<IValidator<PointOfInterestDto>, PointOfInterestValidation>();
             services.AddControllers();
         }
 

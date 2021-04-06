@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using TodoItemApi.Models;
+using TodoItemApi.Dtos;
 using System.Linq;
 
 namespace TodoItemApi.Services

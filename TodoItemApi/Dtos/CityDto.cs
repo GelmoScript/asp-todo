@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text.Json.Serialization;
 
-namespace TodoItemApi.Models
+namespace TodoItemApi.Dtos
 {
     public class CityDto
     {
@@ -10,11 +9,13 @@ namespace TodoItemApi.Models
         public string Name { get; set; }
         public string Description { get; set; }
 
-        [JsonIgnore]
+        public bool IsDeleted { get; set; }
+        public DateTime? DeleteDate { get; set; }
+        public DateTime? LastUpdateDate { get; set; }
+
         public ICollection<PointOfInterestDto> PointsOfInterest { get; set; }
             = new List<PointOfInterestDto>();
 
-        [JsonIgnore]
         public int NumberOfPointOfInterests
         {
             get
@@ -23,8 +24,5 @@ namespace TodoItemApi.Models
             }
         }
 
-
-            
-        
     }
 }

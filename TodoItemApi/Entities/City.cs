@@ -18,7 +18,12 @@ namespace TodoItemApi.Entities
         [MaxLength(200)]
         public string Description { get; set; }
 
-        public ICollection<PointOfInterest> PointOfInterests { get; set; }
+        [Column("Deleted")]
+        public bool IsDeleted { get; set; }
+        public DateTime? DeleteDate { get; set; }
+        public DateTime? LastUpdateDate { get; set; }
+
+        public ICollection<PointOfInterest> PointsOfInterest { get; set; }
             = new List<PointOfInterest>();
     }
 }

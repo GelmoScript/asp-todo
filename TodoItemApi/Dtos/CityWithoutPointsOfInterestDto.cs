@@ -1,8 +1,9 @@
 ﻿using System;
-namespace TodoItemApi.Models
+namespace TodoItemApi.Dtos
 {
-    public class CityForUpdateDto
+    public class CityWithoutPointsOfInterestDto
     {
+        public int Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
     }
